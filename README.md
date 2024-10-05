@@ -1,6 +1,9 @@
 # SystemProgrammingEssentialswithGo
+
 System Programming Essentials with Go - the book
 
+Corresponding repo:
+https://github.com/PacktPublishing/System-Programming-Essentials-with-Go
 
 ## Prep:
 
