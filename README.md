@@ -280,3 +280,32 @@ Permissions can be returned by `FileInfo.Mode().Perm()` and they are returned in
 A file path is a string representation of a file or directory's location within a filesystem. linux example: `/home/klundert/`.
 
 Go offers abstractions over platform-specific implementations n the `path/filepath` package.
+
+### Symbolic links
+
+A link or 'pointer' to the place where the actual file is.
+
+In the Linux command line, you can create a symbolic link using the ln command with the -s option:
+```
+ln -s /home/user/documents/important_document.txt /home/user/desktop/
+shortcut_to_document.txt
+```
+
+Here’s what’s happening:
+• `ln`: This is the command for creating links
+• `-s`: This option specifies that we’re creating a symbolic link (symlink)
+• `/home/user/documents/important_document.txt`: This is the source file you
+want to link to
+• `/home/user/desktop/shortcut_to_document.txt`: This is the destination where
+you want to create the symbolic link
+
+
+### Unlinking files
+
+Unlinking a file or symbolic link is removing a file or a symbolic link.
+
+### Memory mapped files
+
+The idea of memory-mapped files was popularized by the UNIX operating system in the 1980s. The mmap system call, introduced in the early versions of UNIX, allowed processes to map files or devices into their address space. This provided a seamless way to work with files as if they were in memory, without the need for explicit file I/O operations.
+
+Good blog [here](https://medium.com/@ZaradarTR/wtf-is-memory-mapped-files-9448c04078a3).
