@@ -201,3 +201,82 @@ go run main.go word1 word2 word3 > stdout.txt 2> stderr.txt
 ```
 
 Everything that is written to `stderr` will be written to `stderr.txt`.
+
+## Files and permissions
+
+In Linux, files are categorized into various types, each serving a unique purpose.
+
+*Regular files*:
+
+Contain data such as text, images or programs.
+
+First char `ls` shows is a `-`.
+
+The `FileMode.IsRegular()` can be checked to see if we are dealing with a regular file.
+
+*Directories*:
+
+Hold other files and directories.
+
+First char ls shows is `d`. 
+
+The `FileMode.IsDir()` can be checked to see if we are dealing with a directory.
+
+*Symbolic links*:
+
+These are pointers to other files. They are denoted by `l` in the first char of `;s`.
+
+The `FileMode` does not tell us if it is a symbolic link, bt we can check if `FileMode` & `os.ModeSymlink` is non-zero.
+
+*Named pipes (FIFOs)*:
+
+Named pipes are mechanisms for inter-process communication, denoted by a `p` in the first char of the file listing. The `os.ModeNamedPipe` bit represents a named pipe.
+
+*Character devices*:
+
+Character devices provide unbuffered, direct access to hardware devices, and are denoted by a c in the first character of the file listing. The `os.ModeCharDevice` bit represents a character device.
+
+*Block devices*:
+
+Provide buffered access to hardware devices and are denoted by a `b` in the first character of the file listing. The `FileMode` does not give you the info, but the os package should allow you to work with block devices.
+
+*Sockets*:
+
+Endpoints for communication, denoted by a `s` in the first char of the file listing. The `os.ModeSocket` but represents a socket.
+
+
+### Files and permissions:
+
+The FileMode type in Go encapsulates these bits and provides methods and constants for working
+with file types and permissions, making it easier to perform file operations in a cross-platform way.
+
+In Linux, the permissions system is a crucial aspect of file and directory security. It determines who
+can access, modify, or execute files and directories. Permissions are represented by a combination of
+read (r), write (w), and execute (x) permissions for three categories of users: owner, group, and others.
+
+Let’s refresh what these permissions represent:
+• `Read (r)`: Allows reading or viewing the file’s contents or listing a directory’s contents
+• `Write (w)`: Allows modifying or deleting a file’s contents or adding/removing files in a directory
+• `Execute (x)`: Allows executing a file or accessing the contents of a directory (if you have execute
+permission on the directory itself)
+
+Linux file permissions are typically displayed in the form of a 9-character string, such as rwxr-xr—,
+where the first three characters represent permissions for the owner, the next three for the group, and
+the last three for others.
+
+When we combine the file type and its permissions, we form the 10-character string that the ls -l
+command returns in the first column of the following example:
+
+```
+-rw-r--r-- 1 user group 0 Oct 25 10:00 file1.txt
+-rw-r--r-- 1 user group 0 Oct 25 10:01 file2.txt
+drwxr-xr-x 2 user group 4096 Oct 25 10:02 directory1
+```
+
+Permissions can be returned by `FileInfo.Mode().Perm()` and they are returned in octal value. For example, rwx (read, write,execute) is 7 (4+2+1), r-x (read, no write, execute) is 5 (4+0+1), and so on. So, for example, the permissions -rwxr-xr-- can be succinctly represented as 755 in octal.
+
+### File paths
+
+A file path is a string representation of a file or directory's location within a filesystem. linux example: `/home/klundert/`.
+
+Go offers abstractions over platform-specific implementations n the `path/filepath` package.
