@@ -1,0 +1,3 @@
+word word1 is odd
+word word2 is odd
+word word3 is odd
