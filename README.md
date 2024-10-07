@@ -309,3 +309,29 @@ Unlinking a file or symbolic link is removing a file or a symbolic link.
 The idea of memory-mapped files was popularized by the UNIX operating system in the 1980s. The mmap system call, introduced in the early versions of UNIX, allowed processes to map files or devices into their address space. This provided a seamless way to work with files as if they were in memory, without the need for explicit file I/O operations.
 
 Good blog [here](https://medium.com/@ZaradarTR/wtf-is-memory-mapped-files-9448c04078a3).
+
+
+## Signal
+
+Notification to a process that an event has occured. When the kernel generates a signal for a process, it is usually due to an event occurring in one of these
+three categories: 
+- hardware-triggered events
+- user-triggered events
+- and software events
+
+
+In Go, you can turn to the `os/signal` packages to deal with both synchronous as well as asynchronous events.
+
+SIGINT signal is sent to a process in response to the user pressing the interrupt character on the
+controlling terminal. The default interrupt character is ^C (Ctrl + C).
+
+Signal handling is crucial for several reasons:
+- graceful shutdown: SIGTERM or SIGINT
+- resource management: SIGUSR1 and SIGUSR2
+- inter-process communication: instruct processes to perform an action, like SIGSTOP or SIGCONT
+- emergency stops: SIGKILL or SIGABRT
+
+## Scheduling
+
+Go’s standard library provides several features that can be used to create a job scheduler, such as
+goroutines for concurrency and the time package for timing events.
