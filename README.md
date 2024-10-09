@@ -335,3 +335,56 @@ Signal handling is crucial for several reasons:
 
 Go’s standard library provides several features that can be used to create a job scheduler, such as
 goroutines for concurrency and the time package for timing events.
+
+## Pipes
+
+Pipes are fundamental tools in inter-process communication (IPC), allowing for data transfer between system processes.
+
+A pipe is like a conduit within memory designed for transporting data between two or more processes. This conduit adheres to the producer-consumer model: one process, the producer, funnels data into the pipe, while another, the consumer, taps into this stream to read the data. Pipes establish a unidirectional flow of information where the pipe has a write-end and a read-end. If two-way communication is required, 2 pipes have to be used.
+
+Pipes are used for a variety of tasks:
+- CLI-utilities
+- data streaming
+- inter-process data exchange
+
+There are similarities between pipes and Go-channels:
+• `Communication mechanisms`: Both pipes and channels are primarily used for communication. Pipes facilitate IPC, while channels are used for communication between goroutines withina Go program.
+• `Data transfer`: At a basic level, both pipes and channels transfer data. In pipes, data flows from one process to another, while data is passed between goroutines in channels.
+• `Synchronization`: Both provide a level of synchronization. Writing to a full pipe or reading from an empty pipe will block the process until the pipe is read from or written to, respectively. Similarly, sending to a full channel or receiving from an empty channel in Go will block the goroutine until the channel is ready for more data.
+• `Buffering`: Pipes and channels can be buffered. A buffered pipe has a defined capacity before
+it blocks or overflows, and similarly, Go channels can be created with a capacity, allowing a
+certain number of values to be held without immediate receiver readiness.
+
+The following are the differences:
+differences:
+• Direction of communication: Standard pipes are unidirectional, meaning they only allow data flow in one direction. Channels in Go are bidirectional by default, allowing data to be sent and received on the same channel.
+• Ease of use in context: Channels are a native feature of Go, offering integration and ease of use within Go programs that pipes cannot match. As a system-level feature, pipes require more setup and handling when used in Go.
+
+
+Use pipes in the following scenarios:
+• You must facilitate communication between different processes, possibly across different programming languages
+• Your application involves separate executables that need to communicate with each other
+• You work in a Unix-like environment and can leverage robust IPC mechanisms
+
+Use Go channels when the following applies:
+• You are developing concurrent applications in Go and need to synchronize and communicate between goroutines
+• You require a straightforward and safe way to handle concurrency within a single Go program
+• You must implement complex concurrency patterns, such as fan-in, fan-out, or worker pools, which Go’s channel and goroutine model elegantly handle
+
+
+Exampel of pipes in use in a CLI tool:
+```
+cat file.txt | grep "flower"
+```
+
+Named pipes are not limited to live processes, unlike anonymous pipes. They can be used between any processes and persist in the filesystem.
+
+You can see named pipes in the filesystem too.
+1. `-`: Regular file
+2. `d`: Directory
+3. `l`: Symbolic link
+4. `c`: Character special file
+5. `b`: Block special file
+6. `p`: Named pipe (FIFO)
+7. `s`: Socket
+
