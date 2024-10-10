@@ -422,3 +422,87 @@ between the client and server without redundant copying. This is not possible us
 communication typically involves more data copying between the kernel and user spaces.
 
 Several systems rely on the benefits of Unix domain sockets, such as D-Bus, Systemd, MySQL/PostgreSQL, Redis, Nginx and Apache.
+
+
+## Memory management
+
+The garbage collector in Go has some jobs to avoid common mistakes and accidents: 
+- it tracks allocations on the heap
+- frees unneeded allocations
+- keeps the allocations in use. 
+
+These jobs are sometimes referrred to as memory inference, or “What memory should I free?”. The two
+main strategies for dealing with memory inference are tracing and reference counting.
+
+Go uses a tracing garbage collector (GC for short), which means the GC will trace objects reachable by a chain of references from “root” objects, consider the rest as “garbage,” and collect them. 
+
+You must have heard this at least once in the tech community: “Garbage collection in Go is automatic, so you can forget about memory management.” Yeah, and I’ve got some prime real estate on the moon to sell you. Believing this is like thinking your house cleans itself because you’ve got a Roomba. In Go, understanding garbage collection is not just a nice-to-have; it’s your ticket to writing efficient, high-performance code. So, buckle up, we’re diving into a world where “automatic” doesn’t mean “magical.”
+
+
+### Stack and heap allocation
+
+Stack allocation in Go is for variables whose lifetime are predictable and tied to the function calls that create them. These are your local variables, function parameters and return values.
+
+The stack is very efficient because of the LIFO nature. Allocating and deallocating is a matter of moving the stack pointer up or down. This simplicity makes it fast but it also introduces limitations. The stack size is small and if you put too much on it, you will get 'stack overflow'.
+
+Heap allocations are for variables whose lifetime is less predictable and not strictly tied to where they were created. Variables are put here typically in case they need to outlive a function. The heap is more flexible (it can grow beyond the stack size) and dynamic. Variables here can be accessed globaly. The cost of this flexibility is that allocating on the heap is slower due to the need for more complex bookkeeping and the responsibility of managing this memory falls to the garbage collector, which adds overhead.
+
+The Go compiler performs 'escape analysis' to decide if a variable should live on the stack or on the heap. If the compiler determines that the lifetime of a variable doesn’t escape the function it’s in, to the stack it goes. But if the variable’s reference is passed around or returned from the function, then it “escapes” to the heap.
+
+While Go abstracts much of the memory management complexity, having a good understanding of how heap and stack allocations work can greatly impact the performance of your applications.
+
+As a rule of thumb, keep your variables in the scope as narrow as possible, and be cautious with pointers and references that might cause unnecessary heap allocations.
+
+### Go's GC
+
+Go’s garbage collection is based on a concurrent, tri-color mark-and-sweep algorithm.
+
+The GC runs alongside your program and does not need to halt everything to clean it up.
+
+Tri-color refers to how the GC views objects:
+- green: in use
+- read: ready to delete
+- yellow: maybe in use, maybe not
+
+The mark-and-sweep part is the definition of the two main phases of the process. In short, during the `mark` phase, the GC scans your objects, flipping their colors based on accessibility. In the `sweep` phase, it takes out the trash – the red objects.
+
+During the marking phase, there is a 0.3 milliseconds stop the world event to identify the root set. Here, the GC identifies what is in use and what not.
+
+After identifying the root set, the marking happens. This happens concurrently with the program.
+
+During the sweeping phase, actual memory is reclaimed by deleting objects.
+
+
+### GOGC
+
+The GOGC is the environmental variable that is tuning knob for the garbage collector. The default value is 100, which means that the GC tries to leave at least 100% of the initial heap memory available after a new GC cycle. Adjusting the GOGC value allows you to tailor the garbage collection to the specific needs of your application.
+
+For instance, when set to 50, the GC runs more frequently, keeping the heap size smaller at the expense of CPU. When set to 200, the GC runs less frequently, costing more memory but saving on the CPU.
+
+### GODEBUG
+
+GODEBUG environment variable in Go is a powerful tool for developers, offering insights into the
+inner workings of the Go runtime. Specifically, the GODEBUG=gctrace=1 setting is often used to
+gain detailed information about garbage collection processes.
+
+### Memory ballast
+
+Allocate a sizeable amount of memory that is always referenced to ensure the GC spends less cycles.
+
+For instance, start off allocating a big array that can handle thousands of bytes for storing session information to mitigate 'refresh storms' ( [Twitch blog](https://blog.twitch.tv/en/2019/04/10/go-memory-ballast-how-i-learnt-to-stop-worrying-and-love-the-heap/)).
+
+Note that this is a strategy that can mask underlying performance issues.
+
+### GOMEMLIMIT
+
+With GOMEMLIMIT, you set a soft cap on the memory usage of the Go runtime, encompassing the
+heap and other runtime-managed memory. This cap is like telling your application, 'Here’s your
+memory budget; spend it wisely.'
+
+By default, GOMEMLIMIT is set to math.MaxInt64, effectively disabling the memory limit.
+
+### Memory arenas
+
+Go 1.20 introduced an expirimental arena package that offers memory arenas. These arenas can enhance performance by decreasing the number of allocations and deallocations that need to be done during runtime.
+
+Memory arenas are a useful tool for allocating objects from a contiguous region of memory and freeing them all at once with minimal memory management or garbage collection overhead. They are especially helpful in functions that require the allocation of many objects, processing them for a significant amount of time, and then freeing all the objects at the end.
