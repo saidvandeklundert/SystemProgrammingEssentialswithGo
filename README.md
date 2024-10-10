@@ -388,3 +388,37 @@ You can see named pipes in the filesystem too.
 6. `p`: Named pipe (FIFO)
 7. `s`: Socket
 
+## Unix sockets
+
+Unix sockets, aka Unix domain sockets, allow processes to communicate with each other on the same machine quickly and effeciently, offering an alternative to TCP/IP sockets for IPC. The feature is unique to Unix and Unix-like operating systems, such as Linux.
+
+Unix sockets are ether stream-oriented (such as TCP) or datagram-oriented (such as UDP). They are represented as filesystem nodes, such as files and directories. However, they are not regular files but 'special' IPC mechanisms.
+
+Three key Unix sockets features:
+- `efficiency`: no networking overhead.
+- `filesystem namespace`: Unix sockets are referenced by filesystem paths. This makes them easy to locate and use but also means they persist in the filesystem until explicitly removed.
+- `security`: access to Unix sockets can be controlled using filesytem permissions, providing a level of security based on user and group IDs.
+
+Inspecting sockets is done with `lsof` (list open files). This command offers insights into files accessed by processes. Unix sockets, treated as file, can be examined using `lsof` to gather relevant information.
+
+You can run `lsof` for specific sockets:
+```
+lsof -Ua /tmp/example.sock
+```
+
+
+Unix domain sockets don’t require the network stack’s overhead, as there’s no need to route data
+through the network layers. This reduces the CPU cycles spent on processing network protocols. Unix
+domain sockets often allow for more efficient data transfer mechanisms within the kernel, such as
+sending a file, which can reduce the amount of data copying between the kernel and user spaces. They
+communicate within the same host, so the latency is typically lower than TCP sockets, which may
+involve more complex routing even when communicating between processes on the same machine.
+
+It is faster then simply calling the loopback interface because the loopback interface still goes through the TCP/IP stack, even though it doesn’t leave themachine. This involves more processing, such as packaging data into TCP segments and IP packets.
+
+They can be more efficient regarding data copying between the kernel and user spaces. Some Unix
+domain socket implementations allow for zero-copy operations, where data is directly passed
+between the client and server without redundant copying. This is not possible using TCP/IP since its
+communication typically involves more data copying between the kernel and user spaces.
+
+Several systems rely on the benefits of Unix domain sockets, such as D-Bus, Systemd, MySQL/PostgreSQL, Redis, Nginx and Apache.
