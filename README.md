@@ -641,3 +641,78 @@ pprof.WriteHeapProfile(f)
 We analyze it using the following:
 
 `go tool pprof memprofile.out`
+
+
+## Networking
+
+Go lets you communicate over TCP connections using two primary abstractions: 
+- `net.Conn`: represents a single TCP connection
+- `net.Listener`: waits around for incoming connection requests
+
+
+
+HTTP verbs:
+- GET: Requests data from a specified resource
+- POST: Submits data to be processed to a specified resource
+- PUT: Updates a specified resource with provided data
+- DELETE: Deletes a specified resource
+- PATCH: Applies partial modifications to a resource
+
+
+HTTP status codes
+HTTP status codes are issued by a server in response to a client’s request. They are grouped into five classes:
+• 1xx (Informational): The request was received, continuing process
+• 2xx (Success): The request was successfully received, understood, and accepted
+• 3xx (Redirection): Further action needs to be taken in order to complete the request
+• 4xx (Client Error): The request contains bad syntax or cannot be fulfilled
+• 5xx (Server Error): The server failed to fulfill an apparently valid request
+
+## Certificates
+
+TLS certificates are a fundamental aspect of secure communication over the internet, providing
+encryption, authentication, and integrity. In the context of Go, TLS certificates are used to secure
+communication between clients and servers, such as in HTTPS servers or clients that need to securely
+connect to other services.
+
+A TLS certificate, often simply called a Secure Sockets Layer (SSL) certificate, serves two main purposes:
+- Encryption: Ensures that the data exchanged between the client and server is encrypted, protecting it from eavesdroppers
+- Authentication: Verifies the identity of the server to the client, ensuring that the client is talking to the legitimate server and not an imposter
+
+A TLS certificate contains the certificate holder’s public key and identity (domain name), and it is signed by a trusted Certificate Authority (CA). When a client connects to a TLS/SSL-secured server, the server presents its certificate. The client verifies the certificate’s validity, including the CA’s signature, the certificate’s expiration date, and the domain name.
+
+
+```
+openssl version
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
+```
+
+### TLS pitfalls
+
+There is a list of pitfalls and things to keep in mind when we’re dealing with TLS in general.
+
+Let’s look at some of them:
+- Validity: Ensure your certificates are valid (not expired) and renew them as necessary. Using expired certificates can lead to service outages.
+- Security: Keep your private keys secure. If a private key is compromised, the corresponding certificate can be misused to intercept or tamper with secure communications.
+- Trust: For production environments, use certificates issued by a trusted CA. Browsers and clients trust these CAs and will show warnings or block connections to sites with self-signed or untrusted certificates.
+- Domain matching: The domain name on the certificate must match the domain name that clients use to connect to your server. Mismatches can lead to security warnings.
+- Certificate chains: Understand how to serve the full certificate chain (not just your server’s certificate) to ensure compatibility with clients.
+- Performance: TLS/SSL has a performance impact due to the encryption and decryption process. Use efficient cipher suites and consider server and client capabilities.
+
+### UPD in Go
+
+Golang’s net package provides excellent support for UDP programming. Key functions/types include the following:
+- net.DialUDP(): Establishes a UDP “connection” (more of a communication channel)
+- net.ListenUDP(): Creates a UDP listener to receive incoming packets
+- UDPConn: Represents a UDP connection, providing methods such as the following:
+  - ReadFromUDP()
+  - WriteToUDP()
+
+In UDP, we can apply a technique called Selective Retransmissions (also known as Selective Acknowledgments, or SACK).
+
+### Websockets
+
+The connection is established through a handshake over HTTP but then upgraded to a long-lived TCP connection. Once established, it has minimal message framing overhead, making it suitable for real-time scenarios.
+
+Followup:
+
+Learn C Programming - Second Edition: A beginner's guide to learning the most powerful and general-purpose programming 
