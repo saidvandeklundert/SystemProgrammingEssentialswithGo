@@ -713,6 +713,28 @@ In UDP, we can apply a technique called Selective Retransmissions (also known as
 
 The connection is established through a handshake over HTTP but then upgraded to a long-lived TCP connection. Once established, it has minimal message framing overhead, making it suitable for real-time scenarios.
 
+## Telemetry
+
+### Logging
+
+The general guideline is as follows:
+- Log consumption tools: Choose JSON for advanced processing tools; choose structured text for simplicity or direct consumption.
+- Data complexity: Use JSON for complex, nested data; structured text for simpler data.
+- Performance considerations: Opt for structured text when performance is critical; use JSON with performance impact in mind.
+- Analysis and troubleshooting: Select JSON for in-depth analysis needs; structured text for basic troubleshooting.
+- Team and infrastructure: Consider team familiarity and infrastructure capabilities.
+
+
+The best practices can be summarized here:
+- Use structured logging: Structured logs make it easier to search and analyze data. Use a consistent format such as JSON across your logs
+- Implement log rotation and retention policies: Automatically rotate logs and define retention policies to manage disk space and comply with data retention requirements
+- Secure log data: Ensure that logs are stored securely, access is controlled, and transmission of log data is encrypted
+- Monitor log files for anomalies: Regularly review log files for unusual activity or errors that could indicate operational or security issues
+
+### Tracing
+
+At its core, Golang’s tracing framework leverages the runtime/trace package to let you peer into the running soul of your application. By collecting a wide range of events related to goroutines, heap allocation, garbage collection, and more, it sets the stage for a deep dive into the inner workings of your code.
+
 Followup:
 
 Learn C Programming - Second Edition: A beginner's guide to learning the most powerful and general-purpose programming 
