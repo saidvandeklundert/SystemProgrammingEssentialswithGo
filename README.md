@@ -94,6 +94,9 @@ pprof.WriteHeapProfile(f)
 # analyze the memory profiling output
 go tool pprof memprofile.out`
 go tool pprof -web memprofile.out
+
+# sync workspace code:
+go work sync
 ```
 
 
@@ -734,6 +737,30 @@ The best practices can be summarized here:
 ### Tracing
 
 At its core, Golang’s tracing framework leverages the runtime/trace package to let you peer into the running soul of your application. By collecting a wide range of events related to goroutines, heap allocation, garbage collection, and more, it sets the stage for a deep dive into the inner workings of your code.
+
+
+## Distributing Go code
+
+### Modules
+
+A module is a collection of related Go packages. It serves as a `versionable` and interchangeable unit of source code.
+
+Modules have two main objectives: to maintain the specific requirements of dependencies and to create reproducible builds.
+
+A repository is like a section in a library dedicated to a specific series or collection. Each module represents a book series within this section. Each book series (module) consists of individual books (packages). Finally, each book (package) contains chapters (Go source files), all within the covers (directory) of that book.
+
+
+### Module workspaces
+
+A Go module workspace is a way to group multiple Go modules that belong to the same project. This feature, introduced to tackle the very beast of dependency management, allows developers to work with multiple modules simultaneously. They aren’t just about neatness. It fundamentally changes how the Go toolchain resolves dependencies.
+
+A Go workspace is a directory containing a unique go.work file referencing one or more go.mod files, each representing a module. This setup permits us to build, test, and manage multiple interrelated modules without the usual headaches of version conflicts.
+
+Within a workspace, the Go compiler treats them as peers instead of relying on an external go.mod file for each module. It looks at the workspace’s go.work file, which lists all modules within the project, making sure everyone plays nicely together.
+
+In other words, workspaces create a self-contained ecosystem for your project. Any changes you make within one module immediately ripple across the others. This streamlines development, particularly when juggling interconnected components of a larger application.
+
+To sync the code in a workspace, use `go work sync`.
 
 Followup:
 
