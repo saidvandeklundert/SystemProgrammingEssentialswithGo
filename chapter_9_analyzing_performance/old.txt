@@ -1,0 +1,10 @@
+goos: linux
+goarch: amd64
+pkg: chapter_9_analyzing_performance
+cpu: 11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz
+BenchmarkFib10-8    	 3853826	       377.9 ns/op
+BenchmarkSum-8      	1000000000	         0.3552 ns/op
+BenchmarkSumSub/small-8         	1000000000	         0.3139 ns/op
+BenchmarkSumSub/large-8         	1000000000	         0.3093 ns/op
+PASS
+ok  	chapter_9_analyzing_performance	2.890s

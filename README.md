@@ -36,6 +36,64 @@ go vet
 # get another package
 go get <package name>
 go get golang.org/x/sys/unix
+
+# trace allocations:
+go build -gcflags "-m -m"
+
+# benchmark:
+go test -bench=.
+
+#benchmark the memory as well:
+go test -bench=. -benchmem
+
+# run the benchmark for 3 seconds and do it 5 times:
+go test -bench=BenchmarkMultiply -benchtime=3s -count=5
+
+go install golang.org/x/perf/cmd/benchstat@latest
+# go test -bench=. > old.txt
+# go test -bench=. > new.txt
+# benchstat old.txt new.txt
+
+
+# cpu profiling requires changes to the program:
+import (
+	"runtime/pprof"
+)
+func main() {
+	// ...
+	f, err := os.Create("cpuprofile.out")
+	if err != nil {
+	// Handle error
+	}
+	defer f.Close()
+	pprof.StartCPUProfile(f)
+	defer pprof.StopCPUProfile()
+	// ... (Rest of your code)
+}
+go build monitor.go
+./monitor
+
+# analyze the output:
+go tool pprof cpuprofile.out
+
+# create a flame graph:
+go tool pprof -web cpuprofile.out
+
+# setup memory profiling:
+
+f, err := os.Create("memprofile.out")
+if err != nil {
+// Handle error
+}
+defer f.Close()
+runtime.GC()
+pprof.WriteHeapProfile(f)
+
+
+
+# analyze the memory profiling output
+go tool pprof memprofile.out`
+go tool pprof -web memprofile.out
 ```
 
 
@@ -506,3 +564,80 @@ By default, GOMEMLIMIT is set to math.MaxInt64, effectively disabling the memory
 Go 1.20 introduced an expirimental arena package that offers memory arenas. These arenas can enhance performance by decreasing the number of allocations and deallocations that need to be done during runtime.
 
 Memory arenas are a useful tool for allocating objects from a contiguous region of memory and freeing them all at once with minimal memory management or garbage collection overhead. They are especially helpful in functions that require the allocation of many objects, processing them for a significant amount of time, and then freeing all the objects at the end.
+
+## Analyzing performance
+
+### Escape analysis
+
+Escape analysis is a compiler optimization technique that’s used to determine whether a variable can
+be safely allocated on the stack or if it must “escape” to the heap. The primary goal of escape analysis is to improve memory usage and performance by allocating variables on the stack whenever possible since stack allocations are faster and more CPU cache-friendly than heap allocations.
+
+### Pointers
+
+Imagine that you’re at a huge music festival. A pointer is not the stage where the band is playing; it’s the map that shows you where the stage is.
+
+To declare a pointer in Go, you use an asterisk (*) before the type. This tells Go, “This variable is going to hold a memory address, not a direct value.” Here’s how it looks:
+
+```go
+var p *int
+```
+
+This line declares a pointer, p, that will point to an integer. But right now, p doesn’t point to anything. It’s like having a map with no marked locations. To point it at an actual integer, you must use the address-of operator (&):
+
+```go
+var x int = 10
+p = &x
+```
+
+Now, p holds the address of x. You’ve marked your stage on the festival map.
+
+Dereferencing is how you access the value at the memory address the pointer is holding. You can do
+this with the same asterisk (*) you used to declare a pointer, but in a different context:
+
+```go
+fmt.Println(*p)
+```
+This line doesn’t print the memory address stored in p; it prints the value of x that p points to, thanks to dereferencing. You’ve gone from looking at the map to standing in front of the stage, enjoying the music.
+
+
+### Stack and heap allocation
+
+Here are some best practices concerning allocation:
+• Minimize large local variables: Consider using the heap for large data structures to avoid consuming too much stack space
+• Be cautious with recursion: Ensure recursive functions have a clear termination condition to prevent stack overflow
+• Understand stack versus heap allocation: Use the stack for short-lived variables and the heap for variables that need to outlive the function call
+
+
+Tracing allocations:
+```
+go build -gcflags "-m -m"
+```
+
+
+### Benchmarking
+
+Benchmarking is a systematic method of measuring and comparing the performance of software. It’s not just about running a piece of code and seeing how fast it goes; it’s about creating a controlled environment where you can understand the impact of changes in code, algorithms, or system architecture. The goal is to provide actionable insights that guide optimization efforts, ensuring that they’re not just shots in the dark.
+
+### Memory profiling
+
+Memory profiling helps you analyze how your Go program allocates and uses memory. It’s critical in systems programming. where you frequently deal with constrained resources and performance-sensitive operations. Here are some key questions it helps answer:
+• Memory leaks: Are you unintentionally holding on to memory that’s no longer needed?
+• Allocation hotspots: Which functions or code blocks are responsible for most allocations?
+• Memory usage patterns: How does memory use change over time, especially under different
+load conditions?
+• Object sizes: How can you understand the memory footprint of key data structures?
+
+Memory profiling is setup like this:
+```go
+f, err := os.Create("memprofile.out")
+if err != nil {
+// Handle error
+}
+defer f.Close()
+runtime.GC()
+pprof.WriteHeapProfile(f)
+```
+
+We analyze it using the following:
+
+`go tool pprof memprofile.out`
