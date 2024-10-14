@@ -99,7 +99,43 @@ go tool pprof -web memprofile.out
 go work sync
 ```
 
+## Notes on packages/modules
 
+- a package must go into its own folder
+- the folder must have the same name as the package
+- a package can be spread across multiple files
+- those files can have any name, `package main` for instance does not need to be `main.go`
+- imports for local packages have to include the module path of the thing you are working on
+
+
+Example on creating a package and organizing some code in a sub-package:
+```
+spewg-cache/
+├── main.go
+├── go.mod                  # go mod init example.com/spewg-cache
+└── spewg/
+    └── server.go
+└── example/
+    └── ex.go	
+```
+
+In the `main.go` file:
+
+```go
+package main
+import (
+	"example.com/spewg-cache/example"
+	"example.com/spewg-cache/spewg"
+)
+```
+
+Items you want to export need to start with a capitalized letter:
+```go
+func Example()
+struct Example{
+	
+}
+```
 
 ## System calls
 
